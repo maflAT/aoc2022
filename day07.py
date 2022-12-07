@@ -119,12 +119,13 @@ class Directory:
     def size(self) -> int:
         return sum(d.size() for d in self.subs.values()) + sum(self.files.values())
 
+    def recursive_subs(self) -> set[Directory]:
+        return {self}.union(*(sub.recursive_subs() for sub in self.subs.values()))
+
 
 input = open("day07_input.txt").readlines()
 
 cwd = root = Directory("/", None)
-directories: set[Directory] = set()
-directories.add(root)
 for line in input:
     match line.split():
         case ["$", "cd", "/"]:
@@ -133,16 +134,12 @@ for line in input:
             cwd = cwd.parent
         case ["$", "cd", sub]:
             cwd = cwd.subs.setdefault(sub, Directory(sub, cwd))
-        case ["$", _]:
-            pass
         case ["dir", sub]:
-            d = Directory(sub, cwd)
-            directories.add(d)
-            cwd.subs.setdefault(sub, d)
-        case [size, file_name]:
+            cwd.subs[sub] = Directory(sub, cwd)
+        case [size, file_name] if size.isdecimal():
             cwd.files[file_name] = int(size)
 
-part1_result = sum(d.size() for d in directories if d.size() <= 100000)
+part1_result = sum(d.size() for d in root.recursive_subs() if d.size() <= 100000)
 print(f"Result 1: {part1_result}")
 
 
@@ -177,6 +174,6 @@ filesystem to run the update. What is the total size of that directory?
 
 size_threshold = 30000000 - 70000000 + root.size()
 min_ = root.size()
-for d in directories:
+for d in root.recursive_subs():
     min_ = min(min_, d.size()) if d.size() >= size_threshold else min_
 print(f"Result 2: {min_}")
