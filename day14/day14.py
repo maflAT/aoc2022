@@ -22,6 +22,7 @@ def move(pos: tuple[int, int]) -> tuple[int, int]:
 for e in rock_edges:
     for c1, c2 in pairwise(e):
         filled.update(fill(c1, c2))
+filled2 = filled.copy()
 
 bottom = max(y for _, y in filled)
 count = 0
@@ -34,6 +35,28 @@ while pos[1] < bottom:
     else:
         pos = new
 
-
 print(f"Result 1: {count}")
-# print(f"Result 2: {}")
+
+# -------------------------------------- Part 2: ------------------------------------- #
+filled = filled2
+bottom += 2
+count = 0
+pos = (500, 0)
+while True:
+    if (new := move(pos)) == pos:
+        filled.add(pos)
+        count += 1
+        if new == (500, 0):
+            break
+        pos = (500, 0)
+    elif new[1] == bottom:
+        filled.add(new)
+        pos = (500, 0)
+    else:
+        pos = new
+
+# for y in range(bottom + 1):
+#     for x in range(490, 510):
+#         print("#" if (x, y) in filled else ".", end="")
+#     print()
+print(f"Result 2: {count}")
